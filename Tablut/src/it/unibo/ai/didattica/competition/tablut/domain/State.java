@@ -46,9 +46,24 @@ public abstract class State {
 	public enum Pawn {
 		EMPTY("O"), WHITE("W"), BLACK("B"), THRONE("T"), KING("K");
 		private final String pawn;
-
 		private Pawn(String s) {
 			pawn = s;
+		}
+
+		public static Pawn fromString(String pawnChar) {
+			if(pawnChar.equals("O")){
+				return Pawn.EMPTY;
+			}
+			if(pawnChar.equals("W")){
+				return Pawn.WHITE;
+			}
+			if(pawnChar.equals("B")){
+				return Pawn.BLACK;
+			}
+			if(pawnChar.equals("T")){
+				return Pawn.THRONE;
+			}
+			return Pawn.KING;
 		}
 
 		public boolean equalsPawn(String otherPawn) {
