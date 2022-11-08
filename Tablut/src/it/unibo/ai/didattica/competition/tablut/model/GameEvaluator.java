@@ -43,16 +43,16 @@ public class GameEvaluator {
         }
         State.Pawn[][] board = state.getBoard();
         Set<Coordinates> activePositions = new HashSet<>();
-        for(int r = 1; r < state.getBoard()[0].length + 1; r++){
-            for(int c = 1; c < state.getBoard()[0].length + 1; c++){
+        for(int r = 0; r < state.getBoard()[0].length; r++){
+            for(int c = 0; c < state.getBoard()[0].length; c++){
                 if(turn == State.Turn.WHITE) {
                     if(board[r][c].equals(State.Pawn.WHITE) || board[r][c].equals(State.Pawn.KING)){
-                        activePositions.add(new Coordinates(indexToLetterPosition(c), r));
+                        activePositions.add(new Coordinates(indexToLetterPosition(c+1), r+1));
                     }
                 }
                 else {
                     if(board[r][c].equals(State.Pawn.BLACK)){
-                        activePositions.add(new Coordinates(indexToLetterPosition(c), r));
+                        activePositions.add(new Coordinates(indexToLetterPosition(c+1), r+1));
                     }
                 }
             }
@@ -85,7 +85,7 @@ public class GameEvaluator {
         }
 
         //filter legal moves
-        return possibleActions.stream().filter(a -> isLegalMove(state, a)).collect(Collectors.toSet());;
+        return possibleActions.stream().filter(a -> isLegalMove(state, a)).collect(Collectors.toSet());
     }
 
     private boolean isLegalMove(State state, Action a){
