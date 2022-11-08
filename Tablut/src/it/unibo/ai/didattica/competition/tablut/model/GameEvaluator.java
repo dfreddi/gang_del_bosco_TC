@@ -4,7 +4,9 @@ import it.unibo.ai.didattica.competition.tablut.domain.Action;
 import it.unibo.ai.didattica.competition.tablut.domain.Coordinates;
 import it.unibo.ai.didattica.competition.tablut.domain.State;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GameEvaluator {
 
@@ -35,7 +37,7 @@ public class GameEvaluator {
         return columnsCoordinates.get(index - 1);
     }
 
-    public Set<Coordinates> getAvailablePositions(State state, State.Turn turn){
+    public Set<Coordinates> getAvailablePawns(State state, State.Turn turn){
         if(turn != State.Turn.BLACK && turn != State.Turn.WHITE){
             return new HashSet<>();
         }
@@ -59,10 +61,31 @@ public class GameEvaluator {
     }
 
     public Set<Action> getLegalMoves(State state){
-        if(state.getTurn().equals(State.Turn.WHITE)){
+        Set<Action> possibleActions = new HashSet<>();
+        Set<Coordinates> availablePawns = getAvailablePawns(state, state.getTurn());
+        List<String> columnsCoordinates = Arrays.asList("a","b","c","d","e","f","g","h","i");
+        List<Integer> rowsCoordinates = Arrays.asList(1,2,3,4,5,6,7,8,9);
 
+        //get all possible moves
+        for(Coordinates c : availablePawns){
+            Set<Coordinates> endingPoints = new HashSet<>();
+            for(Integer row: rowsCoordinates){
+                endingPoints.add(new Coordinates(c.getColumn(), row));
+            }
+            for(String column: columnsCoordinates) {
+                endingPoints.add(new Coordinates(column, c.getRow()));
+            }
+            for(Coordinates endPoint: endingPoints){
+                try {
+                    possibleActions.add(new Action(c.toString(), endPoint.toString(), state.getTurn()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-        return null;
+
+        //filter legal moves
+        return possibleActions.stream().filter(a -> isLegalMove(state, a)).collect(Collectors.toSet());;
     }
 
     private boolean isLegalMove(State state, Action a){
