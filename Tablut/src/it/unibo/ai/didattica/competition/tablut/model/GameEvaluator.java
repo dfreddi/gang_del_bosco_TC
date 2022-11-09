@@ -11,8 +11,10 @@ import java.util.stream.Collectors;
 public class GameEvaluator {
 
     private final ArrayList<String> citadels;
+    private final ActionStrategy actionStrategy;
 
     public GameEvaluator() {
+
         this.citadels = new ArrayList<String>();
         this.citadels.add("a4");
         this.citadels.add("a5");
@@ -30,6 +32,7 @@ public class GameEvaluator {
         this.citadels.add("e9");
         this.citadels.add("f9");
         this.citadels.add("e8");
+        this.actionStrategy = new ActionStrategy(citadels);
     }
 
     private String indexToLetterPosition(int index){
@@ -195,5 +198,50 @@ public class GameEvaluator {
             }
         }
         return true;
+    }
+
+
+
+    public State performAction(State state, Action a) {
+        state = actionStrategy.movePawn(state, a);
+
+        // a questo punto controllo lo stato per eventuali catture
+        if (state.getTurn().equalsTurn("W")) {
+            state = actionStrategy.checkCaptureBlack(state, a);
+        } else if (state.getTurn().equalsTurn("B")) {
+            state = actionStrategy.checkCaptureWhite(state, a);
+        }
+
+        // if something has been captured, clear cache for draws
+        if (actionStrategy.getMovesWithutCapturing() == 0) {
+            actionStrategy.getDrawConditions().clear();
+        }
+
+        // controllo pareggio
+        int trovati = 0;
+        for (State s : actionStrategy.getDrawConditions()) {
+
+            if (s.equals(state)) {
+                // DEBUG: //
+                // System.out.println("UGUALI:");
+                // System.out.println("STATO VECCHIO:\t" + s.toLinearString());
+                // System.out.println("STATO NUOVO:\t" +
+                // state.toLinearString());
+
+                trovati++;
+                if (trovati > actionStrategy.getRepeated_moves_allowed()) {
+                    state.setTurn(State.Turn.DRAW);
+                    break;
+                }
+            } else {
+                // DEBUG: //
+                // System.out.println("DIVERSI:");
+                // System.out.println("STATO VECCHIO:\t" + s.toLinearString());
+                // System.out.println("STATO NUOVO:\t" +
+                // state.toLinearString());
+            }
+        }
+        actionStrategy.getDrawConditions().add(state.clone());
+        return state;
     }
 }
